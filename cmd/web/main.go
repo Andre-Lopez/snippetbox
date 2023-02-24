@@ -5,12 +5,17 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/template/html"
 )
 
 const PORT = ":4000"
 
 func main() {
-	app := fiber.New()
+	engine := html.New("../../ui/html/pages", ".html")
+	app := fiber.New(fiber.Config{
+		Views: engine,
+	})
+
 	app.Get("/", home)
 	app.Get("/snippet/view", viewSnippet)
 	app.Post("/snippet/create", createSnippet)

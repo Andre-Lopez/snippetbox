@@ -12,8 +12,8 @@ func home(c *fiber.Ctx) error {
 	if c.Path() != "/" {
 		return c.SendStatus(http.StatusNotFound)
 	}
-	c.SendString("Hello from snippetbox")
-	return nil
+
+	return c.Render("home", fiber.Map{})
 }
 
 func viewSnippet(c *fiber.Ctx) error {
