@@ -11,9 +11,10 @@ import (
 const PORT = ":4000"
 
 func main() {
-	engine := html.New("../../ui/html/pages", ".html")
+	engine := html.New("./ui/html", ".html")
 	app := fiber.New(fiber.Config{
-		Views: engine,
+		Views:       engine,
+		ViewsLayout: "layouts/main",
 	})
 
 	app.Get("/", home)
