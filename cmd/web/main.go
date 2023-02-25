@@ -17,6 +17,8 @@ func main() {
 		ViewsLayout: "layouts/main",
 	})
 
+	app.Static("/static", "./ui/static", fiber.Static{Browse: true})
+
 	app.Get("/", home)
 	app.Get("/snippet/view", viewSnippet)
 	app.Post("/snippet/create", createSnippet)
