@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func home(c *fiber.Ctx) error {
+func (app *application) home(c *fiber.Ctx) error {
 	if c.Path() != "/" {
 		return c.SendStatus(http.StatusNotFound)
 	}
@@ -16,7 +16,7 @@ func home(c *fiber.Ctx) error {
 	return c.Render("home", fiber.Map{})
 }
 
-func viewSnippet(c *fiber.Ctx) error {
+func (app *application) viewSnippet(c *fiber.Ctx) error {
 	id := c.Query("id")
 	intId, err := strconv.Atoi(id)
 
@@ -28,7 +28,7 @@ func viewSnippet(c *fiber.Ctx) error {
 	return nil
 }
 
-func createSnippet(c *fiber.Ctx) error {
+func (app *application) createSnippet(c *fiber.Ctx) error {
 	c.SendString("Create route from snippetbox")
 	return nil
 }
