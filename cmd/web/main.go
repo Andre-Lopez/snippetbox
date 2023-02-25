@@ -4,14 +4,13 @@ import (
 	"flag"
 	"log"
 	"os"
-
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/template/html"
 )
 
 type application struct {
-	errorLog *log.Logger
-	infoLog  *log.Logger
+	errorLog   *log.Logger
+	infoLog    *log.Logger
+	port       string
+	staticPath string
 }
 
 func main() {
@@ -26,30 +25,15 @@ func main() {
 
 	// init our app struct
 	application := &application{
-		errorLog: errorLog,
-		infoLog:  infoLog,
+		errorLog:   errorLog,
+		infoLog:    infoLog,
+		port:       *PORT,
+		staticPath: *STATIC_PATH,
 	}
 
-	engine := html.New("./ui/html", ".html")
-	app := fiber.New(fiber.Config{
-		ErrorHandler: func(ctx *fiber.Ctx, err error) error {
-			application.serverError(ctx, err)
-			return nil
-		},
-		Views:       engine,
-		ViewsLayout: "layouts/main",
-	})
-
-	app.Static("/static", *STATIC_PATH, fiber.Static{Browse: true})
-
-	app.Get("/", application.home)
-	app.Get("/snippet/view", application.viewSnippet)
-	app.Post("/snippet/create", application.createSnippet)
+	// Init our fiber app
+	app := application.routes()
 
 	infoLog.Println("Starting on server", *PORT)
-	app.Use(func(c *fiber.Ctx) error {
-		return c.SendStatus(fiber.StatusNotFound)
-	})
-
 	errorLog.Fatal(app.Listen(*PORT))
 }
