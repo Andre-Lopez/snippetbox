@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -10,7 +9,8 @@ import (
 
 func (app *application) home(c *fiber.Ctx) error {
 	if c.Path() != "/" {
-		return c.SendStatus(http.StatusNotFound)
+		app.notFound(c)
+		return nil
 	}
 
 	return c.Render("home", fiber.Map{})
@@ -21,7 +21,8 @@ func (app *application) viewSnippet(c *fiber.Ctx) error {
 	intId, err := strconv.Atoi(id)
 
 	if err != nil || intId < 1 {
-		return c.SendStatus(http.StatusNotFound)
+		app.notFound(c)
+		return nil
 	}
 
 	c.SendString(fmt.Sprintf("Viewing id: %d", intId))

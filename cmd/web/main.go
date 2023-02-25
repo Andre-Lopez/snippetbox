@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/gofiber/fiber/v2"
@@ -34,7 +33,7 @@ func main() {
 	engine := html.New("./ui/html", ".html")
 	app := fiber.New(fiber.Config{
 		ErrorHandler: func(ctx *fiber.Ctx, err error) error {
-			errorLog.Fatal(err)
+			application.serverError(ctx, err)
 			return nil
 		},
 		Views:       engine,
@@ -49,7 +48,7 @@ func main() {
 
 	infoLog.Println("Starting on server", *PORT)
 	app.Use(func(c *fiber.Ctx) error {
-		return c.SendStatus(http.StatusNotFound)
+		return c.SendStatus(fiber.StatusNotFound)
 	})
 
 	errorLog.Fatal(app.Listen(*PORT))
