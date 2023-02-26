@@ -4,6 +4,8 @@ go 1.19
 
 require github.com/gofiber/fiber/v2 v2.42.0
 
+require github.com/go-sql-driver/mysql v1.7.0 // indirect
+
 require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/gofiber/template v1.7.5
