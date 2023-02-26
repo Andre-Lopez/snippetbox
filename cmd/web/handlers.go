@@ -1,9 +1,11 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 
+	"github.com/Andre-Lopez/snippetbox/internal/models"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -25,7 +27,17 @@ func (app *application) viewSnippet(c *fiber.Ctx) error {
 		return nil
 	}
 
-	c.SendString(fmt.Sprintf("Viewing id: %d", intId))
+	snippet, err := app.snippets.Get(intId)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			app.notFound(c)
+		} else {
+			app.serverError(c, err)
+		}
+		return err
+	}
+
+	c.JSON(snippet)
 	return nil
 }
 
