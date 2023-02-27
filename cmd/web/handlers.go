@@ -44,8 +44,7 @@ func (app *application) viewSnippet(c *fiber.Ctx) error {
 		return err
 	}
 
-	c.JSON(snippet)
-	return nil
+	return c.Render("view", fiber.Map{"snippet": snippet})
 }
 
 func (app *application) createSnippet(c *fiber.Ctx) error {
