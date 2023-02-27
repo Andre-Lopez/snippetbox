@@ -1,6 +1,9 @@
 package main
 
 import (
+	"errors"
+
+	"github.com/Andre-Lopez/snippetbox/internal/models"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html"
 )
@@ -9,7 +12,11 @@ func (app *application) routes() *fiber.App {
 	engine := html.New("./ui/html", ".html")
 	mux := fiber.New(fiber.Config{
 		ErrorHandler: func(ctx *fiber.Ctx, err error) error {
-			app.serverError(ctx, err)
+			if errors.Is(err, models.ErrNoRecord) {
+				app.notFound(ctx)
+			} else {
+				app.serverError(ctx, err)
+			}
 			return nil
 		},
 

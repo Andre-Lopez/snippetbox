@@ -28,6 +28,7 @@ func (app *application) viewSnippet(c *fiber.Ctx) error {
 	}
 
 	snippet, err := app.snippets.Get(intId)
+
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
 			app.notFound(c)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"runtime/debug"
 
 	"github.com/gofiber/fiber/v2"
@@ -14,8 +15,8 @@ func (app *application) serverError(c *fiber.Ctx, err error) {
 	c.Status(fiber.StatusInternalServerError).SendString("Internal Server Error")
 }
 
-func (app *application) clientError(c *fiber.Ctx, status int) *fiber.Ctx {
-	return c.Status(status)
+func (app *application) clientError(c *fiber.Ctx, status int) {
+	c.Status(status).SendString(http.StatusText(status))
 }
 
 func (app *application) notFound(c *fiber.Ctx) {
