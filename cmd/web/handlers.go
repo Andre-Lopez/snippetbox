@@ -15,7 +15,13 @@ func (app *application) home(c *fiber.Ctx) error {
 		return nil
 	}
 
-	return c.Render("home", fiber.Map{})
+	snippets, err := app.snippets.Latest()
+	if err != nil {
+		app.serverError(c, err)
+		return err
+	}
+
+	return c.Render("home", fiber.Map{"snippets": snippets})
 }
 
 func (app *application) viewSnippet(c *fiber.Ctx) error {
