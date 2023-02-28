@@ -4,24 +4,20 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/Andre-Lopez/snippetbox/internal/models"
 	"github.com/gofiber/fiber/v2"
 )
 
 func (app *application) home(c *fiber.Ctx) error {
-	if c.Path() != "/" {
-		app.notFound(c)
-		return nil
-	}
-
 	snippets, err := app.snippets.Latest()
 	if err != nil {
 		app.serverError(c, err)
 		return err
 	}
 
-	return c.Render("home", fiber.Map{"snippets": snippets})
+	return c.Render("home", fiber.Map{"currentYear": time.Now().Year(), "snippets": snippets})
 }
 
 func (app *application) viewSnippet(c *fiber.Ctx) error {
@@ -44,7 +40,7 @@ func (app *application) viewSnippet(c *fiber.Ctx) error {
 		return err
 	}
 
-	return c.Render("view", fiber.Map{"snippet": snippet})
+	return c.Render("view", fiber.Map{"currentYear": time.Now().Year(), "snippet": snippet})
 }
 
 func (app *application) createSnippet(c *fiber.Ctx) error {
