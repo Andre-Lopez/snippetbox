@@ -20,21 +20,27 @@
         <!-- Title input text -->
         <div>
           <label for="title">Title:</label>
-          <input type="text" name="title" />
+          {{with .errors.title}}
+          <label class="error">{{.}}</label>
+          {{end}}
+          <input type="text" name="title" value="{{.title}}" />
         </div>
 
         <!-- Content textarea -->
         <div>
           <label for="content">Content:</label>
-          <textarea name="content" cols="30" rows="10"></textarea>
+          {{with .errors.content}}
+          <label class="error">{{.}}</label>
+          {{end}}
+          <textarea name="content" cols="30" rows="10">{{.content}}</textarea>
         </div>
 
         <!-- Expires select -->
         <div>
           <label for="expires">Delete in:</label>
-          <input type="radio" name="expires" value="365" checked /> One Year
-          <input type="radio" name="expires" value="7" /> One Week
-          <input type="radio" name="expires" value="1" /> One Day
+          <input type="radio" name="expires" value="365" {{if (eq .expires 365)}}checked{{end}} /> One Year
+          <input type="radio" name="expires" value="7" {{if (eq .expires 7)}}checked{{end}} /> One Week
+          <input type="radio" name="expires" value="1" {{if (eq .expires 1)}}checked{{end}} /> One Day
         </div>
 
         <!-- Submit button -->
