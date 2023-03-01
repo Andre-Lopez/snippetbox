@@ -1,26 +1,44 @@
 <!-- Title -->
-{{define "title"}}Home{{ end }}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="shortcut icon" href="/static/img/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="/static/css/main.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700" />
+    <title>Home</title>
+  </head>
+  <body>
+    <header>
+      <h1><a href="">Snippetbox</a></h1>
+    </header>
 
-<!-- Main content -->
-{{define "main"}}
-<h2>Latest Snippets</h2>
-{{if .snippets}}
-<table>
-  <tr>
-    <td>Title</td>
-    <td>Created</td>
-    <td>ID</td>
-  </tr>
-  {{ range .snippets }}
-  <tr>
-    <td>
-      <a href="/snippet/view?id={{.ID}}">{{.Title}}</a>
-    </td>
-    <td>{{.Created}}</td>
-    <td>{{.ID}}</td>
-  </tr>
-  {{ end }}
-</table>
-{{else}}
-<p>Nothing to see here...</p>
-{{ end }} {{ end }}
+    {{template "nav" .}}
+
+    <main>
+      <h2>Latest Snippets</h2>
+      {{if .snippets}}
+      <table>
+        <tr>
+          <td>Title</td>
+          <td>Created</td>
+          <td>ID</td>
+        </tr>
+        {{ range .snippets }}
+        <tr>
+          <td>
+            <a href="/snippet/view/{{.ID}}">{{.Title}}</a>
+          </td>
+          <td>{{.Created}}</td>
+          <td>{{.ID}}</td>
+        </tr>
+        {{ end }}
+      </table>
+      {{else}}
+      <p>Nothing to see here...</p>
+      {{ end }}
+    </main>
+
+    <footer>Powered by <a href="https://go.dev" target="_blank">Go</a> in {{.currentYear}}</footer>
+  </body>
+</html>

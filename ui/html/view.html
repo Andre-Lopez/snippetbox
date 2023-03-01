@@ -1,17 +1,36 @@
 <!-- Title -->
-{{define "title"}}Snippet #{{.snippet.ID}}{{ end }}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="shortcut icon" href="/static/img/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="/static/css/main.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700" />
+    <title>Snippet #{{.snippet.ID}}</title>
+  </head>
+  <body>
+    <header>
+      <h1><a href="">Snippetbox</a></h1>
+    </header>
 
-<!-- Main content -->
-{{define "main"}} {{ with.snippet }}
-<div class="snippet">
-  <div class="metadata">
-    <strong>{{.Title}}</strong>
-    <span>#{{.ID}}</span>
-  </div>
-  <pre><code>{{.Content}}</code></pre>
-  <div class="metadata">
-    <time>Created: {{.Created}}</time>
-    <time>Expires: {{.Expires}}</time>
-  </div>
-</div>
-{{ end }} {{ end }}
+    {{template "nav" .}}
+
+    <main>
+      {{ with.snippet }}
+      <div class="snippet">
+        <div class="metadata">
+          <strong>{{.Title}}</strong>
+          <span>#{{.ID}}</span>
+        </div>
+        <pre><code>{{.Content}}</code></pre>
+        <div class="metadata">
+          <time>Created: {{.Created}}</time>
+          <time>Expires: {{.Expires}}</time>
+        </div>
+      </div>
+      {{ end }}
+    </main>
+
+    <footer>Powered by <a href="https://go.dev" target="_blank">Go</a> in {{.currentYear}}</footer>
+  </body>
+</html>

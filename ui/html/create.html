@@ -1,0 +1,49 @@
+<!-- Title -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="shortcut icon" href="/static/img/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="/static/css/main.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700" />
+    <title>Create a new Snippet</title>
+  </head>
+  <body>
+    <header>
+      <h1><a href="">Snippetbox</a></h1>
+    </header>
+
+    {{template "nav" .}}
+
+    <main>
+      <form action="/snippet/create" method="POST">
+        <!-- Title input text -->
+        <div>
+          <label for="title">Title:</label>
+          <input type="text" name="title" />
+        </div>
+
+        <!-- Content textarea -->
+        <div>
+          <label for="content">Content:</label>
+          <textarea name="content" cols="30" rows="10"></textarea>
+        </div>
+
+        <!-- Expires select -->
+        <div>
+          <label for="expires">Delete in:</label>
+          <input type="radio" name="expires" value="365" checked /> One Year
+          <input type="radio" name="expires" value="7" /> One Week
+          <input type="radio" name="expires" value="1" /> One Day
+        </div>
+
+        <!-- Submit button -->
+        <div>
+          <input type="submit" value="Create snippet" />
+        </div>
+      </form>
+    </main>
+
+    <footer>Powered by <a href="https://go.dev" target="_blank">Go</a> in {{.currentYear}}</footer>
+  </body>
+</html>

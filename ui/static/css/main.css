@@ -71,6 +71,10 @@ input:not([type="submit"]) {
   font-family: "Ubuntu Mono", monospace;
 }
 
+textarea {
+  resize: none;
+}
+
 header {
   background-image: -webkit-linear-gradient(
     left,

@@ -21,7 +21,7 @@ func (app *application) home(c *fiber.Ctx) error {
 }
 
 func (app *application) viewSnippet(c *fiber.Ctx) error {
-	id := c.Query("id")
+	id := c.Params("id")
 	intId, err := strconv.Atoi(id)
 
 	if err != nil || intId < 1 {
@@ -43,7 +43,7 @@ func (app *application) viewSnippet(c *fiber.Ctx) error {
 	return c.Render("view", fiber.Map{"currentYear": time.Now().Year(), "snippet": snippet})
 }
 
-func (app *application) createSnippet(c *fiber.Ctx) error {
+func (app *application) createSnippetPost(c *fiber.Ctx) error {
 	body := struct {
 		title   string `json:"title"`
 		content string `json:"content"`
@@ -64,4 +64,8 @@ func (app *application) createSnippet(c *fiber.Ctx) error {
 
 	c.Redirect(fmt.Sprintf("/snippet/view?id=%d", id), fiber.StatusSeeOther)
 	return nil
+}
+
+func (app *application) createSnippet(c *fiber.Ctx) error {
+	return c.Render("create", fiber.Map{})
 }
