@@ -4,13 +4,19 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"strings"
 	"time"
-	"unicode/utf8"
 
 	"github.com/Andre-Lopez/snippetbox/internal/models"
+	"github.com/Andre-Lopez/snippetbox/internal/validator"
 	"github.com/gofiber/fiber/v2"
 )
+
+type createSnippetForm struct {
+	Title   string
+	Content string
+	Expires int
+	validator.Validator
+}
 
 func (app *application) home(c *fiber.Ctx) error {
 	snippets, err := app.snippets.Latest()
@@ -46,45 +52,39 @@ func (app *application) viewSnippet(c *fiber.Ctx) error {
 }
 
 func (app *application) createSnippetPost(c *fiber.Ctx) error {
-	title := c.FormValue("title")
-	content := c.FormValue("content")
 	expires, err := strconv.Atoi(c.FormValue("expires"))
 	if err != nil {
 		app.clientError(c, fiber.StatusBadRequest)
 		return err
 	}
 
-	fieldErrors := make(map[string]string)
-
-	// Validate title
-	if strings.TrimSpace(title) == "" {
-		fieldErrors["title"] = "This field cannot be empty"
-	} else if utf8.RuneCountInString(title) > 100 {
-		fieldErrors["title"] = "This field cannot be longer than 100 characters"
+	// Init form values
+	form := createSnippetForm{
+		Title:   c.FormValue("title"),
+		Content: c.FormValue("content"),
+		Expires: expires,
 	}
 
-	// Validate content
-	if strings.TrimSpace(content) == "" {
-		fieldErrors["content"] = "This field cannot be empty"
+	// Run validations for each field
+	form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be empty")
+	form.CheckField(validator.MaxChars(form.Title, 100), "title", "This field cannot be longer than 100 characters")
+	form.CheckField(validator.NotBlank(form.Content), "content", "This field cannot be empty")
+	form.CheckField(validator.PermittedInt(form.Expires, 1, 7, 365), "expires", "This field must have a value of 1, 7, or 365")
+
+	// Return form with data and errors if needed
+	if !form.Valid() {
+		return c.Render("create", fiber.Map{"title": form.Title, "content": form.Content, "expires": form.Expires, "errors": form.FieldErrors})
 	}
 
-	if expires != 1 && expires != 7 && expires != 365 {
-		fieldErrors["expires"] = "This field must have a value of 1, 7, or 365"
-	}
-
-	// Re-serve the creation form with displayed errors
-	if len(fieldErrors) > 0 {
-		return c.Render("create", fiber.Map{"title": title, "content": content, "expires": expires, "errors": fieldErrors})
-	}
-
-	id, err := app.snippets.Insert(title, content, expires)
+	// Create new snippet if data is valid
+	id, err := app.snippets.Insert(form.Title, form.Content, form.Expires)
 	if err != nil {
 		app.serverError(c, err)
 		return err
 	}
 
-	c.Redirect(fmt.Sprintf("/snippet/view/%d", id), fiber.StatusSeeOther)
-	return nil
+	// Redirect user to new snippet view page
+	return c.Redirect(fmt.Sprintf("/snippet/view/%d", id), fiber.StatusSeeOther)
 }
 
 func (app *application) createSnippet(c *fiber.Ctx) error {
