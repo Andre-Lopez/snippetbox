@@ -12,10 +12,10 @@ import (
 )
 
 type createSnippetForm struct {
-	Title   string
-	Content string
-	Expires int
-	validator.Validator
+	Title               string `form:"title"`
+	Content             string `form:"content"`
+	Expires             int    `form:"expires"`
+	validator.Validator `form:"-"`
 }
 
 func (app *application) home(c *fiber.Ctx) error {
@@ -52,17 +52,11 @@ func (app *application) viewSnippet(c *fiber.Ctx) error {
 }
 
 func (app *application) createSnippetPost(c *fiber.Ctx) error {
-	expires, err := strconv.Atoi(c.FormValue("expires"))
-	if err != nil {
+	var form createSnippetForm
+
+	if err := c.BodyParser(&form); err != nil {
 		app.clientError(c, fiber.StatusBadRequest)
 		return err
-	}
-
-	// Init form values
-	form := createSnippetForm{
-		Title:   c.FormValue("title"),
-		Content: c.FormValue("content"),
-		Expires: expires,
 	}
 
 	// Run validations for each field
