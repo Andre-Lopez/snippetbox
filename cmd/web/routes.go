@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"time"
 
 	"github.com/Andre-Lopez/snippetbox/cmd/web/middleware"
 	"github.com/Andre-Lopez/snippetbox/cmd/web/middleware/secureHeaders"
@@ -22,7 +23,10 @@ func (app *application) routes() *fiber.App {
 			}
 			return nil
 		},
-		Views: html.New("./ui/html", ".html"),
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		Views:        html.New("./ui/html", ".html"),
 	})
 
 	// Logger Middleware

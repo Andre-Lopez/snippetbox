@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"flag"
 	"log"
@@ -48,7 +49,8 @@ func main() {
 	})
 
 	store := session.New(session.Config{
-		Storage: storeDb,
+		Storage:      storeDb,
+		CookieSecure: true,
 	})
 
 	// init our app struct
@@ -64,8 +66,24 @@ func main() {
 	// Init our fiber app
 	app := application.routes()
 
+	// Set up TLS Cert
+	cer, err := tls.LoadX509KeyPair("tls/cert.pem", "tls/key.pem")
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+
+	config := &tls.Config{
+		Certificates:     []tls.Certificate{cer},
+		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
+	}
+
+	ln, err := tls.Listen("tcp", *PORT, config)
+	if err != nil {
+		panic(err)
+	}
+
 	infoLog.Println("Starting on server", *PORT)
-	errorLog.Fatal(app.Listen(*PORT))
+	errorLog.Fatal(app.Listener(ln))
 }
 
 func openDB(dsn string) (*sql.DB, error) {
