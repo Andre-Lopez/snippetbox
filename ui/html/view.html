@@ -16,6 +16,12 @@
     {{template "nav" .}}
 
     <main>
+      <!-- Display flash message -->
+      {{with .flash}}
+      <div class="flash">{{.}}</div>
+      {{end}}
+
+      <!-- Display snippet info  -->
       {{ with.snippet }}
       <div class="snippet">
         <div class="metadata">

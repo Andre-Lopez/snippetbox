@@ -29,6 +29,13 @@ func (app *application) home(c *fiber.Ctx) error {
 }
 
 func (app *application) viewSnippet(c *fiber.Ctx) error {
+	// Get session
+	sess, err := app.sessionManager.Get(c)
+	if err != nil {
+		app.clientError(c, fiber.StatusUnauthorized)
+		return err
+	}
+
 	id := c.Params("id")
 	intId, err := strconv.Atoi(id)
 
@@ -48,10 +55,25 @@ func (app *application) viewSnippet(c *fiber.Ctx) error {
 		return err
 	}
 
-	return c.Render("view", fiber.Map{"currentYear": time.Now().Year(), "snippet": snippet})
+	flash := sess.Get("flash")
+	sess.Delete("flash")
+
+	// Save session, still render template if cannot save
+	if err := sess.Save(); err != nil {
+		return c.Render("view", fiber.Map{"currentYear": time.Now().Year(), "snippet": snippet, "flash": flash})
+	}
+
+	return c.Render("view", fiber.Map{"currentYear": time.Now().Year(), "snippet": snippet, "flash": flash})
 }
 
 func (app *application) createSnippetPost(c *fiber.Ctx) error {
+	// Get session
+	sess, err := app.sessionManager.Get(c)
+	if err != nil {
+		app.clientError(c, fiber.StatusUnauthorized)
+		return err
+	}
+
 	var form createSnippetForm
 
 	if err := c.BodyParser(&form); err != nil {
@@ -75,6 +97,14 @@ func (app *application) createSnippetPost(c *fiber.Ctx) error {
 	if err != nil {
 		app.serverError(c, err)
 		return err
+	}
+
+	// Create entry in session to display successful toast
+	sess.Set("flash", "Snippet successfully created!")
+
+	// Save our session, still render template if cannot save
+	if err := sess.Save(); err != nil {
+		return c.Redirect(fmt.Sprintf("/snippet/view/%d", id), fiber.StatusSeeOther)
 	}
 
 	// Redirect user to new snippet view page

@@ -7,16 +7,19 @@ import (
 	"os"
 
 	"github.com/Andre-Lopez/snippetbox/internal/models"
+	"github.com/gofiber/fiber/v2/middleware/session"
+	"github.com/gofiber/storage/mysql"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 type application struct {
-	errorLog   *log.Logger
-	infoLog    *log.Logger
-	port       string
-	staticPath string
-	snippets   *models.SnippetModel
+	errorLog       *log.Logger
+	infoLog        *log.Logger
+	port           string
+	staticPath     string
+	snippets       *models.SnippetModel
+	sessionManager *session.Store
 }
 
 func main() {
@@ -36,13 +39,26 @@ func main() {
 	}
 	defer db.Close()
 
+	// Set up session manager, will use our mysql DB
+	storeDb := mysql.New(mysql.Config{
+		Database: "snippetbox",
+		Db:       db,
+		Table:    "sessions",
+		Reset:    true,
+	})
+
+	store := session.New(session.Config{
+		Storage: storeDb,
+	})
+
 	// init our app struct
 	application := &application{
-		errorLog:   errorLog,
-		infoLog:    infoLog,
-		port:       *PORT,
-		staticPath: *STATIC_PATH,
-		snippets:   &models.SnippetModel{DB: db},
+		errorLog:       errorLog,
+		infoLog:        infoLog,
+		port:           *PORT,
+		staticPath:     *STATIC_PATH,
+		snippets:       &models.SnippetModel{DB: db},
+		sessionManager: store,
 	}
 
 	// Init our fiber app
