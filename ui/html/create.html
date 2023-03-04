@@ -20,27 +20,28 @@
         <!-- Title input text -->
         <div>
           <label for="title">Title:</label>
-          {{with .errors.title}}
+          {{with .Form.FieldErrors.title}}
           <label class="error">{{.}}</label>
           {{end}}
-          <input type="text" name="title" value="{{.title}}" />
+          <input type="text" name="title" value="{{.Form.Title}}" />
         </div>
 
         <!-- Content textarea -->
         <div>
           <label for="content">Content:</label>
-          {{with .errors.content}}
+          {{with .Form.FieldErrors.content}}
           <label class="error">{{.}}</label>
           {{end}}
-          <textarea name="content" cols="30" rows="10">{{.content}}</textarea>
+          <textarea name="content" cols="30" rows="10">{{.Form.Content}}</textarea>
         </div>
 
         <!-- Expires select -->
         <div>
           <label for="expires">Delete in:</label>
-          <input type="radio" name="expires" value="365" {{if (eq .expires 365)}}checked{{end}} /> One Year
-          <input type="radio" name="expires" value="7" {{if (eq .expires 7)}}checked{{end}} /> One Week
-          <input type="radio" name="expires" value="1" {{if (eq .expires 1)}}checked{{end}} /> One Day
+          <input type="radio" name="expires" value="365" {{if (eq .Form.Expires 365)}}checked{{end}} /> One
+          Year <input type="radio" name="expires" value="7" {{if (eq .Form.Expires 7)}}checked{{end}} /> One
+          Week <input type="radio" name="expires" value="1" {{if (eq .Form.Expires 1)}}checked{{end}} /> One
+          Day
         </div>
 
         <!-- Submit button -->
@@ -50,6 +51,6 @@
       </form>
     </main>
 
-    <footer>Powered by <a href="https://go.dev" target="_blank">Go</a> in {{.currentYear}}</footer>
+    <footer>Powered by <a href="https://go.dev" target="_blank">Go</a> in {{.CurrentYear}}</footer>
   </body>
 </html>

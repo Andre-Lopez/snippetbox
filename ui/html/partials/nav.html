@@ -3,12 +3,12 @@
 <nav>
   <div>
     <a href="/">Home</a>
-    {{if .isLoggedin}}
+    {{if .IsAuthenticated}}
     <a href="/snippet/create">Create snippet</a>
     {{end}}
   </div>
   <div>
-    {{if .isLoggedin}}
+    {{if .IsAuthenticated}}
     <form action="/user/logout" method="POST">
       <button>Logout</button>
     </form>

@@ -6,7 +6,7 @@
     <link rel="shortcut icon" href="/static/img/favicon.ico" type="image/x-icon" />
     <link rel="stylesheet" href="/static/css/main.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700" />
-    <title>Snippet #{{.snippet.ID}}</title>
+    <title>Snippet #{{.Snippet.ID}}</title>
   </head>
   <body>
     <header>
@@ -17,12 +17,12 @@
 
     <main>
       <!-- Display flash message -->
-      {{with .flash}}
+      {{with .Flash}}
       <div class="flash">{{.}}</div>
       {{end}}
 
       <!-- Display snippet info  -->
-      {{ with.snippet }}
+      {{ with.Snippet }}
       <div class="snippet">
         <div class="metadata">
           <strong>{{.Title}}</strong>
@@ -37,6 +37,6 @@
       {{ end }}
     </main>
 
-    <footer>Powered by <a href="https://go.dev" target="_blank">Go</a> in {{.currentYear}}</footer>
+    <footer>Powered by <a href="https://go.dev" target="_blank">Go</a> in {{.CurrentYear}}</footer>
   </body>
 </html>

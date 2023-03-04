@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/Andre-Lopez/snippetbox/internal/models"
 	"github.com/Andre-Lopez/snippetbox/internal/validator"
@@ -33,46 +32,20 @@ type userLoginForm struct {
 
 // Serves the home page displaying last 10 created snippets
 func (app *application) viewHome(c *fiber.Ctx) error {
-	// Get session
-	sess, err := app.sessionManager.Get(c)
-	if err != nil {
-		app.clientError(c, fiber.StatusUnauthorized)
-		return err
-	}
-
 	snippets, err := app.snippets.Latest()
 	if err != nil {
 		app.serverError(c, err)
 		return err
 	}
 
-	// TODO: improve
-	authUserId := sess.Get("authUserId")
-	flash := sess.Get("flash")
-	sess.Delete("flash")
+	data := app.newTemplateData(c)
+	data.Snippets = snippets
 
-	if err := sess.Save(); err != nil {
-		app.serverError(c, err)
-		return err
-	}
-
-	return c.Render("home", fiber.Map{
-		"currentYear": time.Now().Year(),
-		"flash":       flash,
-		"isLoggedin":  authUserId,
-		"snippets":    snippets},
-	)
+	return c.Render("home", *data)
 }
 
 // Handles snippet ID and serves details page of according snippet
 func (app *application) viewSnippet(c *fiber.Ctx) error {
-	// Get session
-	sess, err := app.sessionManager.Get(c)
-	if err != nil {
-		app.clientError(c, fiber.StatusUnauthorized)
-		return err
-	}
-
 	id := c.Params("id")
 	intId, err := strconv.Atoi(id)
 
@@ -92,15 +65,10 @@ func (app *application) viewSnippet(c *fiber.Ctx) error {
 		return err
 	}
 
-	flash := sess.Get("flash")
-	sess.Delete("flash")
+	data := app.newTemplateData(c)
+	data.Snippet = snippet
 
-	// Save session, still render template if cannot save
-	if err := sess.Save(); err != nil {
-		return c.Render("view", fiber.Map{"currentYear": time.Now().Year(), "snippet": snippet, "flash": flash})
-	}
-
-	return c.Render("view", fiber.Map{"currentYear": time.Now().Year(), "snippet": snippet, "flash": flash})
+	return c.Render("view", *data)
 }
 
 // Handles snippet data and creates a new snippet if valid
@@ -127,7 +95,10 @@ func (app *application) createSnippetPost(c *fiber.Ctx) error {
 
 	// Return form with data and errors if needed
 	if !form.Valid() {
-		return c.Render("create", fiber.Map{"title": form.Title, "content": form.Content, "expires": form.Expires, "errors": form.FieldErrors})
+		data := app.newTemplateData(c)
+		data.Form = form
+
+		return c.Render("create", *data)
 	}
 
 	// Create new snippet if data is valid
@@ -151,7 +122,11 @@ func (app *application) createSnippetPost(c *fiber.Ctx) error {
 
 // Serves the snippet creation form
 func (app *application) createSnippet(c *fiber.Ctx) error {
-	return c.Render("create", fiber.Map{"expires": 365})
+	data := app.newTemplateData(c)
+	data.Form = createSnippetForm{
+		Expires: 365,
+	}
+	return c.Render("create", *data)
 }
 
 // Serves the user signup form
@@ -184,7 +159,9 @@ func (app *application) userSignupPost(c *fiber.Ctx) error {
 
 	// Return form with errors if needed
 	if !form.Valid() {
-		return c.Render("signup", fiber.Map{"name": form.Name, "email": form.Email, "errors": form.FieldErrors})
+		data := app.newTemplateData(c)
+		data.Form = form
+		return c.Render("signup", *data)
 	}
 
 	// Create new user
@@ -203,12 +180,19 @@ func (app *application) userSignupPost(c *fiber.Ctx) error {
 	// Set flash message notifying success
 	sess.Set("flash", "Signup successful. Please login...")
 
+	// Save our session, still render template if cannot save
+	if err := sess.Save(); err != nil {
+		return c.Redirect("/user/login", fiber.StatusSeeOther)
+	}
+
 	return c.Redirect("/user/login", fiber.StatusSeeOther)
 }
 
 // Serves the user login form
 func (app *application) userLogin(c *fiber.Ctx) error {
-	return c.Render("login", fiber.Map{})
+	data := app.newTemplateData(c)
+	data.Form = userLoginForm{}
+	return c.Render("login", *data)
 }
 
 // Handles login data and sets auth token if credentials valid
@@ -233,7 +217,9 @@ func (app *application) userLoginPost(c *fiber.Ctx) error {
 	form.CheckField(validator.NotBlank(form.Password), "password", "This field cannot be blank")
 
 	if !form.Valid() {
-		return c.Render("login", fiber.Map{"email": form.Email, "errors": form.FieldErrors})
+		data := app.newTemplateData(c)
+		data.Form = form
+		return c.Render("login", *data)
 	}
 
 	// Check validation of credentials
@@ -241,19 +227,14 @@ func (app *application) userLoginPost(c *fiber.Ctx) error {
 	if err != nil {
 		if errors.Is(err, models.ErrInvalidCredentials) {
 			form.AddNonFieldError("Email or password is incorrect")
-			return c.Render("login", fiber.Map{"email": form.Email, "nonFieldErrors": form.NonFieldErrors})
+			data := app.newTemplateData(c)
+			data.Form = form
+			return c.Render("login", *data)
 		} else {
 			app.serverError(c, err)
 			return err
 		}
 	}
-
-	// TODO: do I need this ???
-	// err = sess.Regenerate()
-	// if err != nil {
-	// 	app.serverError(c, err)
-	// 	return err
-	// }
 
 	// Set auth cookie and save session
 	sess.Set("authUserId", id)

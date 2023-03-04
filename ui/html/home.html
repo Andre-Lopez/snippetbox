@@ -17,19 +17,19 @@
 
     <main>
       <!-- Display flash message -->
-      {{with .flash}}
+      {{with .Flash}}
       <div class="flash">{{.}}</div>
       {{end}}
 
       <h2>Latest Snippets</h2>
-      {{if .snippets}}
+      {{if .Snippets}}
       <table>
         <tr>
           <td>Title</td>
           <td>Created</td>
           <td>ID</td>
         </tr>
-        {{ range .snippets }}
+        {{ range .Snippets }}
         <tr>
           <td>
             <a href="/snippet/view/{{.ID}}">{{.Title}}</a>
@@ -44,6 +44,6 @@
       {{ end }}
     </main>
 
-    <footer>Powered by <a href="https://go.dev" target="_blank">Go</a> in {{.currentYear}}</footer>
+    <footer>Powered by <a href="https://go.dev" target="_blank">Go</a> in {{.CurrentYear}}</footer>
   </body>
 </html>

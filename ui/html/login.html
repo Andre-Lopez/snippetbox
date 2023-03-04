@@ -14,23 +14,28 @@
     {{template "nav" .}}
 
     <main>
+      <!-- Display flash message -->
+      {{with .Flash}}
+      <div class="flash">{{.}}</div>
+      {{end}}
+
       <form action="/user/login" method="POST">
-        {{range .nonFieldErrors}}
+        {{range .Form.NonFieldErrors}}
         <div class="error">{{.}}</div>
         {{end}}
         <!-- Email field -->
         <div>
           <label for="email">Email:</label>
-          {{with .errors.email}}
+          {{with .Form.FieldErrors.email}}
           <label class="error" for="email">{{.}}</label>
           {{end}}
-          <input type="email" name="email" value="{{.email}}" />
+          <input type="email" name="email" value="{{.Form.Email}}" />
         </div>
 
         <!-- Password field -->
         <div>
           <label for="email">Password:</label>
-          {{with .errors.password}}
+          {{with .Form.FieldErrors.password}}
           <label class="error" for="password">{{.}}</label>
           {{end}}
           <input type="password" name="password" />
