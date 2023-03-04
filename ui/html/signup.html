@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/static/css/main.css" />
+    <title>Signup</title>
+  </head>
+  <body>
+    <header>
+      <h1><a href="">Snippetbox</a></h1>
+    </header>
+
+    {{template "nav" .}}
+
+    <main>
+      <form action="/user/signup" method="POST">
+        <!-- Name field -->
+        <div>
+          <label for="name">Name:</label>
+          {{with .errors.name}}
+          <label class="error" for="name">{{.}}</label>
+          {{end}}
+          <input type="text" name="name" value="{{.name}}" />
+        </div>
+
+        <!-- Email field -->
+        <div>
+          <label for="email">Email:</label>
+          {{with .errors.email}}
+          <label class="error" for="email">{{.}}</label>
+          {{end}}
+          <input type="email" name="email" value="{{.email}}" />
+        </div>
+
+        <!-- Password field -->
+        <div>
+          <label for="email">Password:</label>
+          {{with .errors.password}}
+          <label class="error" for="password">{{.}}</label>
+          {{end}}
+          <input type="password" name="password" />
+        </div>
+
+        <!-- Submit btn -->
+        <div>
+          <input type="submit" value="Signup" />
+        </div>
+      </form>
+    </main>
+  </body>
+</html>

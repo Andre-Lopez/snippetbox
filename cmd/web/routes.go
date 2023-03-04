@@ -42,10 +42,16 @@ func (app *application) routes() *fiber.App {
 
 	mux.Static("/static", app.staticPath, fiber.Static{Browse: true})
 
-	mux.Get("/", app.home)
+	mux.Get("/", app.viewHome)
 	mux.Get("/snippet/view/:id", app.viewSnippet)
 	mux.Get("/snippet/create", app.createSnippet)
 	mux.Post("/snippet/create", app.createSnippetPost)
+
+	mux.Get("/user/signup", app.userSignup)
+	mux.Post("/user/signup", app.userSignupPost)
+	mux.Get("/user/login", app.userLogin)
+	mux.Post("/user/login", app.userLoginPost)
+	mux.Post("/user/logout", app.userLogout)
 
 	mux.Use(func(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusNotFound)

@@ -1,6 +1,7 @@
 package validator
 
 import (
+	"regexp"
 	"strings"
 	"unicode/utf8"
 )
@@ -8,6 +9,8 @@ import (
 type Validator struct {
 	FieldErrors map[string]string
 }
+
+var EmailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=? ^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
 // Returns true if not errors have been stored in FieldErrors map
 func (v *Validator) Valid() bool {
@@ -33,14 +36,24 @@ func (v *Validator) CheckField(ok bool, key, message string) {
 	}
 }
 
-// Returns true if a string is not empty
-func NotBlank(value string) bool {
-	return strings.TrimSpace(value) != ""
+// Returns true if a string is GE a min value
+func MinChars(value string, min int) bool {
+	return utf8.RuneCountInString(value) >= min
 }
 
 // Returns true if a string is LE a max value
 func MaxChars(value string, max int) bool {
 	return utf8.RuneCountInString(value) <= max
+}
+
+// Returns true if a string matches the provided regex
+func Matches(value string, rx *regexp.Regexp) bool {
+	return rx.MatchString(value)
+}
+
+// Returns true if a string is not empty
+func NotBlank(value string) bool {
+	return strings.TrimSpace(value) != ""
 }
 
 // Returns true if a value is in a list of ints

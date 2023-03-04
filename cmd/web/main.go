@@ -21,6 +21,7 @@ type application struct {
 	staticPath     string
 	snippets       *models.SnippetModel
 	sessionManager *session.Store
+	users          *models.UserModel
 }
 
 func main() {
@@ -61,6 +62,7 @@ func main() {
 		staticPath:     *STATIC_PATH,
 		snippets:       &models.SnippetModel{DB: db},
 		sessionManager: store,
+		users:          &models.UserModel{DB: db},
 	}
 
 	// Init our fiber app

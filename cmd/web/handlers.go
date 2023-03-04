@@ -18,7 +18,15 @@ type createSnippetForm struct {
 	validator.Validator `form:"-"`
 }
 
-func (app *application) home(c *fiber.Ctx) error {
+type userSignupForm struct {
+	Name                string `form:"name"`
+	Email               string `form:"email"`
+	Password            string `form:"password"`
+	validator.Validator `form:"-"`
+}
+
+// Serves the home page displaying last 10 created snippets
+func (app *application) viewHome(c *fiber.Ctx) error {
 	snippets, err := app.snippets.Latest()
 	if err != nil {
 		app.serverError(c, err)
@@ -28,6 +36,7 @@ func (app *application) home(c *fiber.Ctx) error {
 	return c.Render("home", fiber.Map{"currentYear": time.Now().Year(), "snippets": snippets})
 }
 
+// Handles snippet ID and serves details page of according snippet
 func (app *application) viewSnippet(c *fiber.Ctx) error {
 	// Get session
 	sess, err := app.sessionManager.Get(c)
@@ -66,6 +75,7 @@ func (app *application) viewSnippet(c *fiber.Ctx) error {
 	return c.Render("view", fiber.Map{"currentYear": time.Now().Year(), "snippet": snippet, "flash": flash})
 }
 
+// Handles snippet data and creates a new snippet if valid
 func (app *application) createSnippetPost(c *fiber.Ctx) error {
 	// Get session
 	sess, err := app.sessionManager.Get(c)
@@ -111,6 +121,73 @@ func (app *application) createSnippetPost(c *fiber.Ctx) error {
 	return c.Redirect(fmt.Sprintf("/snippet/view/%d", id), fiber.StatusSeeOther)
 }
 
+// Serves the snippet creation form
 func (app *application) createSnippet(c *fiber.Ctx) error {
 	return c.Render("create", fiber.Map{"expires": 365})
+}
+
+// Serves the user signup form
+func (app *application) userSignup(c *fiber.Ctx) error {
+	return c.Render("signup", fiber.Map{})
+}
+
+// Handles signup data and registers user if valid
+func (app *application) userSignupPost(c *fiber.Ctx) error {
+	// Get session
+	sess, err := app.sessionManager.Get(c)
+	if err != nil {
+		app.clientError(c, fiber.StatusUnauthorized)
+		return err
+	}
+
+	// Parse form data
+	var form userSignupForm
+	if err := c.BodyParser(&form); err != nil {
+		app.clientError(c, fiber.StatusBadRequest)
+		return err
+	}
+
+	form.CheckField(validator.NotBlank(form.Name), "name", "This field cannot be blank")
+	form.CheckField(validator.NotBlank(form.Email), "email", "This field cannot be blank")
+	form.CheckField(validator.Matches(form.Email, validator.EmailRegex), "email", "Must enter a valid email")
+	form.CheckField(validator.NotBlank(form.Password), "password", "This field cannot be blank")
+	form.CheckField(validator.MinChars(form.Password, 7), "password", "Password must be at least 7 characters")
+
+	// Return form with errors if needed
+	if !form.Valid() {
+		return c.Render("signup", fiber.Map{"name": form.Name, "email": form.Email, "errors": form.FieldErrors})
+	}
+
+	// Create new user
+	err = app.users.Insert(form.Name, form.Email, form.Password)
+	if err != nil {
+		if errors.Is(err, models.ErrDuplicateEmail) {
+			form.AddFieldError("email", "Email address is already in use")
+
+			return c.Render("signup", fiber.Map{"name": form.Name, "email": form.Email, "errors": form.FieldErrors})
+		} else {
+			app.serverError(c, err)
+			return err
+		}
+	}
+
+	// Set flash message notifying success
+	sess.Set("flash", "Signup successful. Please login...")
+
+	return c.Redirect("/user/login", fiber.StatusSeeOther)
+}
+
+// Serves the user login form
+func (app *application) userLogin(c *fiber.Ctx) error {
+	return c.JSON("NOT IMPLEMENTED")
+}
+
+// Handles login data and sets auth token if credentials valid
+func (app *application) userLoginPost(c *fiber.Ctx) error {
+	return c.JSON("NOT IMPLEMENTED")
+}
+
+// Handles login data and sets auth token if credentials valid
+func (app *application) userLogout(c *fiber.Ctx) error {
+	return c.JSON("NOT IMPLEMENTED")
 }
