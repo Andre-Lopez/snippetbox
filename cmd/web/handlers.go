@@ -46,7 +46,22 @@ func (app *application) viewHome(c *fiber.Ctx) error {
 		return err
 	}
 
-	return c.Render("home", fiber.Map{"currentYear": time.Now().Year(), "isLoggedin": sess.Get("authUserId"), "snippets": snippets})
+	// TODO: improve
+	authUserId := sess.Get("authUserId")
+	flash := sess.Get("flash")
+	sess.Delete("flash")
+
+	if err := sess.Save(); err != nil {
+		app.serverError(c, err)
+		return err
+	}
+
+	return c.Render("home", fiber.Map{
+		"currentYear": time.Now().Year(),
+		"flash":       flash,
+		"isLoggedin":  authUserId,
+		"snippets":    snippets},
+	)
 }
 
 // Handles snippet ID and serves details page of according snippet
@@ -233,11 +248,12 @@ func (app *application) userLoginPost(c *fiber.Ctx) error {
 		}
 	}
 
-	err = sess.Regenerate()
-	if err != nil {
-		app.serverError(c, err)
-		return err
-	}
+	// TODO: do I need this ???
+	// err = sess.Regenerate()
+	// if err != nil {
+	// 	app.serverError(c, err)
+	// 	return err
+	// }
 
 	// Set auth cookie and save session
 	sess.Set("authUserId", id)
@@ -251,5 +267,23 @@ func (app *application) userLoginPost(c *fiber.Ctx) error {
 
 // Handles login data and sets auth token if credentials valid
 func (app *application) userLogout(c *fiber.Ctx) error {
-	return c.JSON("NOT IMPLEMENTED")
+	// Get session
+	sess, err := app.sessionManager.Get(c)
+	if err != nil {
+		app.clientError(c, fiber.StatusUnauthorized)
+		return err
+	}
+
+	// Delete auth cookie
+	sess.Delete("authUserId")
+
+	// Create entry in session to display successful toast
+	sess.Set("flash", "You have been successfully logged out")
+
+	if err := sess.Save(); err != nil {
+		app.serverError(c, err)
+		return err
+	}
+
+	return c.Redirect("/", fiber.StatusSeeOther)
 }

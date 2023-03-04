@@ -16,6 +16,11 @@
     {{template "nav" .}}
 
     <main>
+      <!-- Display flash message -->
+      {{with .flash}}
+      <div class="flash">{{.}}</div>
+      {{end}}
+
       <h2>Latest Snippets</h2>
       {{if .snippets}}
       <table>

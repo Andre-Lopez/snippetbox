@@ -3,7 +3,9 @@
 <nav>
   <div>
     <a href="/">Home</a>
+    {{if .isLoggedin}}
     <a href="/snippet/create">Create snippet</a>
+    {{end}}
   </div>
   <div>
     {{if .isLoggedin}}
