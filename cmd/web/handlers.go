@@ -25,15 +25,28 @@ type userSignupForm struct {
 	validator.Validator `form:"-"`
 }
 
+type userLoginForm struct {
+	Email               string `form:"email"`
+	Password            string `form:"password"`
+	validator.Validator `form:"-"`
+}
+
 // Serves the home page displaying last 10 created snippets
 func (app *application) viewHome(c *fiber.Ctx) error {
+	// Get session
+	sess, err := app.sessionManager.Get(c)
+	if err != nil {
+		app.clientError(c, fiber.StatusUnauthorized)
+		return err
+	}
+
 	snippets, err := app.snippets.Latest()
 	if err != nil {
 		app.serverError(c, err)
 		return err
 	}
 
-	return c.Render("home", fiber.Map{"currentYear": time.Now().Year(), "snippets": snippets})
+	return c.Render("home", fiber.Map{"currentYear": time.Now().Year(), "isLoggedin": sess.Get("authUserId"), "snippets": snippets})
 }
 
 // Handles snippet ID and serves details page of according snippet
@@ -147,6 +160,7 @@ func (app *application) userSignupPost(c *fiber.Ctx) error {
 		return err
 	}
 
+	// Run validations for each field
 	form.CheckField(validator.NotBlank(form.Name), "name", "This field cannot be blank")
 	form.CheckField(validator.NotBlank(form.Email), "email", "This field cannot be blank")
 	form.CheckField(validator.Matches(form.Email, validator.EmailRegex), "email", "Must enter a valid email")
@@ -179,12 +193,60 @@ func (app *application) userSignupPost(c *fiber.Ctx) error {
 
 // Serves the user login form
 func (app *application) userLogin(c *fiber.Ctx) error {
-	return c.JSON("NOT IMPLEMENTED")
+	return c.Render("login", fiber.Map{})
 }
 
 // Handles login data and sets auth token if credentials valid
 func (app *application) userLoginPost(c *fiber.Ctx) error {
-	return c.JSON("NOT IMPLEMENTED")
+	// Get session
+	sess, err := app.sessionManager.Get(c)
+	if err != nil {
+		app.clientError(c, fiber.StatusUnauthorized)
+		return err
+	}
+
+	// Parse form data
+	var form userLoginForm
+	if err := c.BodyParser(&form); err != nil {
+		app.clientError(c, fiber.StatusBadRequest)
+		return err
+	}
+
+	// Run validations for each field
+	form.CheckField(validator.NotBlank(form.Email), "email", "This field cannot be blank")
+	form.CheckField(validator.Matches(form.Email, validator.EmailRegex), "email", "Must enter a valid email")
+	form.CheckField(validator.NotBlank(form.Password), "password", "This field cannot be blank")
+
+	if !form.Valid() {
+		return c.Render("login", fiber.Map{"email": form.Email, "errors": form.FieldErrors})
+	}
+
+	// Check validation of credentials
+	id, err := app.users.Authenticate(form.Email, form.Password)
+	if err != nil {
+		if errors.Is(err, models.ErrInvalidCredentials) {
+			form.AddNonFieldError("Email or password is incorrect")
+			return c.Render("login", fiber.Map{"email": form.Email, "nonFieldErrors": form.NonFieldErrors})
+		} else {
+			app.serverError(c, err)
+			return err
+		}
+	}
+
+	err = sess.Regenerate()
+	if err != nil {
+		app.serverError(c, err)
+		return err
+	}
+
+	// Set auth cookie and save session
+	sess.Set("authUserId", id)
+	if err := sess.Save(); err != nil {
+		app.serverError(c, err)
+		return err
+	}
+
+	return c.Redirect("/", fiber.StatusSeeOther)
 }
 
 // Handles login data and sets auth token if credentials valid
