@@ -2,19 +2,24 @@ package main
 
 import (
 	"errors"
+	"net/http"
 	"time"
 
 	"github.com/Andre-Lopez/snippetbox/cmd/web/middleware"
 	"github.com/Andre-Lopez/snippetbox/internal/models"
+	"github.com/Andre-Lopez/snippetbox/ui"
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/gofiber/fiber/v2/middleware/csrf"
+	"github.com/gofiber/fiber/v2/middleware/filesystem"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/template/html"
 )
 
 func (app *application) routes() *fiber.App {
+	engine := html.NewFileSystem(http.Dir("./ui/html"), ".html")
+
 	mux := fiber.New(fiber.Config{
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
 			if errors.Is(err, models.ErrNoRecord) {
@@ -27,7 +32,7 @@ func (app *application) routes() *fiber.App {
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
-		Views:        html.New("./ui/html", ".html"),
+		Views:        engine,
 	})
 
 	// Auth middleware
@@ -52,7 +57,9 @@ func (app *application) routes() *fiber.App {
 	// Panic Recovery Middleware
 	mux.Use(recover.New())
 
-	mux.Static("/static", app.staticPath, fiber.Static{Browse: true})
+	mux.Use("/static/*", filesystem.New(filesystem.Config{
+		Root: http.FS(ui.Static),
+	}))
 
 	mux.Get("/", app.viewHome)
 	mux.Get("/snippet/view/:id", app.viewSnippet)

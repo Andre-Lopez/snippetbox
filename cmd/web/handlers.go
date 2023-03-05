@@ -128,6 +128,7 @@ func (app *application) createSnippet(c *fiber.Ctx) error {
 	data.Form = createSnippetForm{
 		Expires: 365,
 	}
+
 	return c.Render("create", *data)
 }
 
