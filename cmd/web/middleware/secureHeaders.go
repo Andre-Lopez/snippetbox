@@ -1,28 +1,13 @@
-package secureHeaders
+package middleware
 
 import (
 	"fmt"
 
-	"github.com/Andre-Lopez/snippetbox/cmd/web/middleware"
 	"github.com/gofiber/fiber/v2"
 )
 
-func configDefault(config ...middleware.Config) middleware.Config {
-	if len(config) < 1 {
-		return middleware.ConfigDefault
-	}
-
-	cfg := config[0]
-
-	if cfg.Filter == nil {
-		cfg.Filter = middleware.ConfigDefault.Filter
-	}
-
-	return cfg
-}
-
-func New(config middleware.Config) fiber.Handler {
-	cfg := configDefault(config)
+func SetSecureHeaders(config Config) fiber.Handler {
+	cfg := SetConfigDefault(config)
 
 	return func(c *fiber.Ctx) error {
 		if cfg.Filter != nil && cfg.Filter(c) {

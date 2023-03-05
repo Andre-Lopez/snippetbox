@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/Andre-Lopez/snippetbox/cmd/web/middleware"
-	"github.com/Andre-Lopez/snippetbox/cmd/web/middleware/secureHeaders"
 	"github.com/Andre-Lopez/snippetbox/internal/models"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -35,7 +34,7 @@ func (app *application) routes() *fiber.App {
 	}))
 
 	// Set Secure Headers Middleware
-	mux.Use(secureHeaders.New(middleware.Config{}))
+	mux.Use(middleware.SetSecureHeaders(middleware.Config{}))
 
 	// Panic Recovery Middleware
 	mux.Use(recover.New())
@@ -44,8 +43,8 @@ func (app *application) routes() *fiber.App {
 
 	mux.Get("/", app.viewHome)
 	mux.Get("/snippet/view/:id", app.viewSnippet)
-	mux.Get("/snippet/create", app.createSnippet)
-	mux.Post("/snippet/create", app.createSnippetPost)
+	mux.Get("/snippet/create", app.RequiresAuth(), app.createSnippet)
+	mux.Post("/snippet/create", app.RequiresAuth(), app.createSnippetPost)
 
 	mux.Get("/user/signup", app.userSignup)
 	mux.Post("/user/signup", app.userSignupPost)
