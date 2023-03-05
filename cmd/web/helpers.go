@@ -20,16 +20,9 @@ type templateData struct {
 	CSRFToken       string
 }
 
-// Return true if request is from authenticated user
+// Return true if req context auth val has been set on request
 func (app *application) isAuthenticated(c *fiber.Ctx) bool {
-	sess, err := app.sessionManager.Get(c)
-	if err != nil {
-		return false
-	}
-
-	authUserId := sess.Get("authUserId")
-
-	return authUserId != nil
+	return c.Locals(isAuthenticatedContextKey) == "true"
 }
 
 // Obtains flash message and deletes if it exists

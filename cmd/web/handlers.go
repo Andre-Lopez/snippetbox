@@ -38,6 +38,8 @@ func (app *application) viewHome(c *fiber.Ctx) error {
 		return err
 	}
 
+	c.Context()
+
 	data := app.newTemplateData(c)
 	data.Snippets = snippets
 

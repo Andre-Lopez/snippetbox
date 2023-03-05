@@ -16,11 +16,11 @@ import (
 
 func (app *application) routes() *fiber.App {
 	mux := fiber.New(fiber.Config{
-		ErrorHandler: func(ctx *fiber.Ctx, err error) error {
+		ErrorHandler: func(c *fiber.Ctx, err error) error {
 			if errors.Is(err, models.ErrNoRecord) {
-				app.notFound(ctx)
+				app.notFound(c)
 			} else {
-				app.serverError(ctx, err)
+				app.serverError(c, err)
 			}
 			return nil
 		},
@@ -29,6 +29,9 @@ func (app *application) routes() *fiber.App {
 		WriteTimeout: 10 * time.Second,
 		Views:        html.New("./ui/html", ".html"),
 	})
+
+	// Auth middleware
+	mux.Use(app.authenticate())
 
 	// Logger Middleware
 	mux.Use(logger.New(logger.Config{
