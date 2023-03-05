@@ -20,6 +20,9 @@
       {{end}}
 
       <form action="/user/login" method="POST">
+        <!-- Include CSRF token -->
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}" />
+
         {{range .Form.NonFieldErrors}}
         <div class="error">{{.}}</div>
         {{end}}

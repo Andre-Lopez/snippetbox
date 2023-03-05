@@ -15,6 +15,9 @@
 
     <main>
       <form action="/user/signup" method="POST">
+        <!-- Include CSRF token -->
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}" />
+
         <!-- Name field -->
         <div>
           <label for="name">Name:</label>

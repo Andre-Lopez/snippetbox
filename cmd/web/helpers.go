@@ -17,6 +17,7 @@ type templateData struct {
 	Form            any
 	Flash           interface{}
 	IsAuthenticated bool
+	CSRFToken       string
 }
 
 // Return true if request is from authenticated user
@@ -57,6 +58,7 @@ func (app *application) newTemplateData(c *fiber.Ctx) *templateData {
 		CurrentYear:     time.Now().Year(),
 		Flash:           app.popFlashMessage(c),
 		IsAuthenticated: app.isAuthenticated(c),
+		CSRFToken:       c.Cookies("csrf"),
 	}
 }
 

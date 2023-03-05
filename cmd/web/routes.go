@@ -7,6 +7,8 @@ import (
 	"github.com/Andre-Lopez/snippetbox/cmd/web/middleware"
 	"github.com/Andre-Lopez/snippetbox/internal/models"
 	"github.com/gofiber/fiber/v2"
+
+	"github.com/gofiber/fiber/v2/middleware/csrf"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/template/html"
@@ -31,6 +33,14 @@ func (app *application) routes() *fiber.App {
 	// Logger Middleware
 	mux.Use(logger.New(logger.Config{
 		Format: "[${ip}] - ${port} ${method} ${path}\n",
+	}))
+
+	// CSRF middleware
+	mux.Use(csrf.New(csrf.Config{
+		KeyLookup:      "form:csrf_token",
+		CookieHTTPOnly: true,
+		CookieSecure:   true,
+		CookieName:     "csrf",
 	}))
 
 	// Set Secure Headers Middleware
