@@ -93,7 +93,7 @@ func (app *application) createSnippetPost(c *fiber.Ctx) error {
 	form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be empty")
 	form.CheckField(validator.MaxChars(form.Title, 100), "title", "This field cannot be longer than 100 characters")
 	form.CheckField(validator.NotBlank(form.Content), "content", "This field cannot be empty")
-	form.CheckField(validator.PermittedInt(form.Expires, 1, 7, 365), "expires", "This field must have a value of 1, 7, or 365")
+	form.CheckField(validator.PermittedValue(form.Expires, 1, 7, 365), "expires", "This field must have a value of 1, 7, or 365")
 
 	// Return form with data and errors if needed
 	if !form.Valid() {
