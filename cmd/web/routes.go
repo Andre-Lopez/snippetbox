@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Andre-Lopez/snippetbox/cmd/web/middleware"
 	"github.com/Andre-Lopez/snippetbox/internal/models"
 	"github.com/Andre-Lopez/snippetbox/ui"
 	"github.com/gofiber/fiber/v2"
@@ -52,7 +51,7 @@ func (app *application) routes() *fiber.App {
 	}))
 
 	// Set Secure Headers Middleware
-	mux.Use(middleware.SetSecureHeaders(middleware.Config{}))
+	mux.Use(SetSecureHeaders(Config{}))
 
 	// Panic Recovery Middleware
 	mux.Use(recover.New())

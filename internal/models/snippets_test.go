@@ -3,6 +3,8 @@ package models
 import (
 	"testing"
 	"time"
+
+	"github.com/Andre-Lopez/snippetbox/internal/assert"
 )
 
 func TestSnippet(t *testing.T) {
@@ -33,9 +35,7 @@ func TestSnippet(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			hd := snippet.ReadableDate(tt.tm)
 
-			if hd != tt.want {
-				t.Errorf("got %q; want %q", hd, tt.want)
-			}
+			assert.Equal(t, hd, tt.want)
 		})
 	}
 }
