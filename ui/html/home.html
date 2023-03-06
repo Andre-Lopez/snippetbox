@@ -34,7 +34,7 @@
           <td>
             <a href="/snippet/view/{{.ID}}">{{.Title}}</a>
           </td>
-          <td>{{.Created}}</td>
+          <td>{{.ReadableDate .Created}}</td>
           <td>{{.ID}}</td>
         </tr>
         {{ end }}

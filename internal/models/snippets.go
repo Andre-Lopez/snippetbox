@@ -86,3 +86,7 @@ func (m *SnippetModel) Latest() ([]*Snippet, error) {
 
 	return snippets, nil
 }
+
+func (s *Snippet) ReadableDate(date time.Time) string {
+	return date.Format("Jan 02, 2006 at 15:04")
+}
