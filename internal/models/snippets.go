@@ -88,5 +88,10 @@ func (m *SnippetModel) Latest() ([]*Snippet, error) {
 }
 
 func (s *Snippet) ReadableDate(date time.Time) string {
-	return date.Format("Jan 02, 2006 at 15:04")
+
+	if date.IsZero() {
+		return ""
+	}
+
+	return date.UTC().Format("Jan 02, 2006 at 15:04")
 }
