@@ -171,9 +171,11 @@ func (app *application) userSignupPost(c *fiber.Ctx) error {
 	err = app.users.Insert(form.Name, form.Email, form.Password)
 	if err != nil {
 		if errors.Is(err, models.ErrDuplicateEmail) {
+			data := app.newTemplateData(c)
 			form.AddFieldError("email", "Email address is already in use")
+			data.Form = form
 
-			return c.Render("signup", fiber.Map{"name": form.Name, "email": form.Email, "errors": form.FieldErrors})
+			return c.Render("signup", *data)
 		} else {
 			app.serverError(c, err)
 			return err

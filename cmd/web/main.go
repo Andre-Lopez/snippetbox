@@ -46,7 +46,7 @@ func main() {
 		Database: "snippetbox",
 		Db:       db,
 		Table:    "sessions",
-		Reset:    true,
+		Reset:    false,
 	})
 
 	store := session.New(session.Config{
