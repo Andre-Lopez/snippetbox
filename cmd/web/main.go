@@ -5,9 +5,11 @@ import (
 	"database/sql"
 	"flag"
 	"log"
+	"net"
 	"os"
 
 	"github.com/Andre-Lopez/snippetbox/internal/models"
+	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"github.com/gofiber/storage/mysql"
 
@@ -25,6 +27,29 @@ type application struct {
 }
 
 func main() {
+	mux, app, ln, db, PORT, err := Setup()
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	app.infoLog.Println("Starting on server", *PORT)
+	app.errorLog.Fatal(mux.Listener(ln))
+}
+
+func openDB(dsn string) (*sql.DB, error) {
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		return nil, err
+	}
+	if err = db.Ping(); err != nil {
+		return nil, err
+	}
+
+	return db, nil
+}
+
+func Setup() (*fiber.App, *application, net.Listener, *sql.DB, *string, error) {
 	// Obtain command line args
 	PORT := flag.String("port", ":4000", "HTTP Network Address")
 	STATIC_PATH := flag.String("static-path", "./ui/static", "Path of static conent to serve")
@@ -38,8 +63,8 @@ func main() {
 	db, err := openDB(*dsn)
 	if err != nil {
 		errorLog.Fatal(err)
+		return nil, nil, nil, nil, nil, err
 	}
-	defer db.Close()
 
 	// Set up session manager, will use our mysql DB
 	storeDb := mysql.New(mysql.Config{
@@ -66,12 +91,13 @@ func main() {
 	}
 
 	// Init our fiber app
-	app := application.routes()
+	mux := application.routes()
 
 	// Set up TLS Cert
 	cer, err := tls.LoadX509KeyPair("tls/cert.pem", "tls/key.pem")
 	if err != nil {
 		errorLog.Fatal(err)
+		return nil, nil, nil, nil, nil, err
 	}
 
 	config := &tls.Config{
@@ -84,18 +110,5 @@ func main() {
 		panic(err)
 	}
 
-	infoLog.Println("Starting on server", *PORT)
-	errorLog.Fatal(app.Listener(ln))
-}
-
-func openDB(dsn string) (*sql.DB, error) {
-	db, err := sql.Open("mysql", dsn)
-	if err != nil {
-		return nil, err
-	}
-	if err = db.Ping(); err != nil {
-		return nil, err
-	}
-
-	return db, nil
+	return mux, application, ln, db, PORT, nil
 }
