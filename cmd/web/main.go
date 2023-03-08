@@ -21,9 +21,9 @@ type application struct {
 	infoLog        *log.Logger
 	port           string
 	staticPath     string
-	snippets       *models.SnippetModel
+	snippets       models.SnippetModelInterface
 	sessionManager *session.Store
-	users          *models.UserModel
+	users          models.UserModelInterface
 }
 
 func main() {
