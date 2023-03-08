@@ -63,16 +63,14 @@ func (app *application) authenticate() fiber.Handler {
 	}
 }
 
-func (app *application) RequiresAuth() fiber.Handler {
+func (app *application) RequiresAuth(c *fiber.Ctx) error {
 
-	return func(c *fiber.Ctx) error {
-		// Redirect user to login page if not authenticated
-		if !app.isAuthenticated(c) {
-			return c.Redirect("/user/login")
-		}
-
-		return c.Next()
+	// Redirect user to login page if not authenticated
+	if !app.isAuthenticated(c) {
+		return c.Redirect("/user/login")
 	}
+
+	return c.Next()
 }
 
 func SetSecureHeaders(config Config) fiber.Handler {
