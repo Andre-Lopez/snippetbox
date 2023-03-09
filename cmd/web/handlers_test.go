@@ -3,6 +3,8 @@ package main
 import (
 	"net/http"
 	"net/http/httputil"
+	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/Andre-Lopez/snippetbox/internal/assert"
@@ -76,4 +78,89 @@ func TestSnippetView(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestUserSignup(t *testing.T) {
+	app := newTestApp(t)
+	mux := app.routes()
+
+	req, err := http.NewRequest(fiber.MethodGet, "/user/signup", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	res, _ := mux.Test(req, -1)
+
+	// Stringify response body
+	body, err := httputil.DumpResponse(res, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	validCsrfToken := extractCSRFToken(t, string(body))
+
+	const (
+		validName     = "Tom"
+		validPassword = "validPassword"
+		validEmail    = "tom@test.com"
+		formTag       = "<form action='/user/signup' method='POST' novalidate>"
+	)
+
+	tests := []struct {
+		name        string
+		userName    string
+		email       string
+		password    string
+		csrfToken   string
+		wantCode    int
+		wantFormTag string
+	}{
+		{
+			name:      "Valid submission",
+			userName:  validName,
+			email:     validEmail,
+			password:  validPassword,
+			csrfToken: validCsrfToken,
+			wantCode:  fiber.StatusSeeOther,
+		},
+		{
+			name:      "Invalid CSRF Token",
+			userName:  validName,
+			email:     validEmail,
+			password:  validPassword,
+			csrfToken: "BAD TOKEN",
+			wantCode:  fiber.StatusBadRequest,
+		},
+		{
+			name:        "Empty Name",
+			userName:    "",
+			email:       validEmail,
+			password:    validPassword,
+			csrfToken:   validCsrfToken,
+			wantCode:    fiber.StatusUnprocessableEntity,
+			wantFormTag: formTag,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			form := url.Values{}
+			form.Add("name", tt.userName)
+			form.Add("email", tt.email)
+			form.Add("password", tt.password)
+			form.Add("csrf_token", tt.csrfToken)
+
+			req, err := http.NewRequest(fiber.MethodPost, "/user/signup", strings.NewReader(form.Encode()))
+			if err != nil {
+				t.Fatal(err)
+			}
+			req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+			res, _ := mux.Test(req)
+
+			// TODO: determine why we get 500 res
+			t.Logf("%v", res)
+		})
+	}
+
 }

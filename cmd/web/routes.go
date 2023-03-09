@@ -17,7 +17,7 @@ import (
 )
 
 func (app *application) routes() *fiber.App {
-	engine := html.NewFileSystem(http.FS(ui.Templates), ".html")
+	engine := html.NewFileSystem(http.FS(ui.Files), ".html")
 
 	mux := fiber.New(fiber.Config{
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
@@ -57,7 +57,7 @@ func (app *application) routes() *fiber.App {
 	mux.Use(recover.New())
 
 	mux.Use("/static/*", filesystem.New(filesystem.Config{
-		Root: http.FS(ui.Static),
+		Root: http.FS(ui.Files),
 	}))
 
 	mux.Get("/", app.viewHome)
