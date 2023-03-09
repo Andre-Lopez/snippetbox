@@ -17,7 +17,7 @@ import (
 )
 
 func (app *application) routes() *fiber.App {
-	engine := html.NewFileSystem(http.Dir("./ui/html"), ".html")
+	engine := html.NewFileSystem(http.FS(ui.Templates), ".html")
 
 	mux := fiber.New(fiber.Config{
 		ErrorHandler: func(c *fiber.Ctx, err error) error {

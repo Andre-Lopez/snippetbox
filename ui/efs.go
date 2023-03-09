@@ -8,3 +8,6 @@ import (
 //
 //go:embed "static"
 var Static embed.FS
+
+//go:embed "html"
+var Templates embed.FS
